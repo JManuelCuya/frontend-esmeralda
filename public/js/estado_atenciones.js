@@ -210,7 +210,7 @@ $('#statsLine').textContent = `Total filtrados: ${total} • Tiempo prom.: ${pro
         <td class="num">${r.tiempoAtencionMin}</td>
         <td class="center">
           <div style="display:flex;gap:6px;justify-content:center">
-            <button   type="submit" class="btn btn-ghost" data-act="ver" data-id="${r.id}">Ver detalle</button>
+            <button class="btn btn-ghost" data-act="ver" data-id="${r.id}">Ver detalle</button>
             <button class="btn btn-ghost" data-act="pdf" data-id="${r.id}">PDF</button>
           </div>
         </td>

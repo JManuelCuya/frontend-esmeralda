@@ -17,13 +17,8 @@ export function registrarAtencion() {
 
   const $ = (id) => document.getElementById(id);
 
-  // Ocultar/relajar "Código Único": lo llena el backend
-  const idWrapper = $("id_atencion")?.closest(".col-md-4");
-  if (idWrapper) idWrapper.style.display = "none";
-  if ($("id_atencion")) {
-    $("id_atencion").required = false;
-    $("id_atencion").readOnly = true;
-  }
+  // ⛔️ Quitar ocultamiento/required del id_atencion (dejamos que se vea si existe)
+  // (si en tu HTML hay 2 inputs con el mismo id, deja solo uno)
 
   const fields = [
     "tipo_atencion",
@@ -47,10 +42,10 @@ export function registrarAtencion() {
     el.classList.remove("is-invalid");
     el.classList.add("is-valid");
   };
-  const clearMsg = () => { mensaje.className = "mt-3"; mensaje.innerHTML = ""; };
-  const showError = (t) => { mensaje.className = "mt-3 alert alert-danger"; mensaje.textContent = t; };
-  const showInfo  = (h) => { mensaje.className = "mt-3 alert alert-info";  mensaje.innerHTML  = h; };
-  const showSuccess = (t) => { mensaje.className = "mt-3 alert alert-success"; mensaje.textContent = t; };
+  const clearMsg   = () => { mensaje.className = "mt-3"; mensaje.innerHTML = ""; };
+  const showError  = (t) => { mensaje.className = "mt-3 alert alert-danger"; mensaje.textContent = t; };
+  const showInfo   = (h) => { mensaje.className = "mt-3 alert alert-info";  mensaje.innerHTML  = h; };
+  const showSuccess= (t) => { mensaje.className = "mt-3 alert alert-success"; mensaje.textContent = t; };
 
   // === Validaciones base ===
   function validateRequired() {
@@ -65,11 +60,7 @@ export function registrarAtencion() {
     return ok;
   }
 
-  // Regla fechas/horas:
-  // - fecha_fin >= fecha_inicio
-  // - si mismo día: hora_fin > hora_inicio
-  // - si día distinto: se permite hora_fin < hora_inicio
-  // - duración mínima 60 min
+  // Reglas fechas/horas
   (function syncMinFechaFin(){
     const fi = $("fecha_inicio"), ff = $("fecha_fin");
     if (fi && ff) {
@@ -113,10 +104,8 @@ export function registrarAtencion() {
     return true;
   }
 
-  // === Flujo progresivo (habilitar paso a paso) ===
+  // === Flujo progresivo ===
   const submitBtn = form.querySelector('button[type="submit"]');
-
-  // Orden del flujo:
   const flow = [
     "tipo_atencion",
     "centro_costos",
@@ -131,65 +120,45 @@ export function registrarAtencion() {
   function setEnabled(id, enabled) {
     const el = $(id); if (!el) return;
     el.disabled = !enabled;
-    // opcional: atenuar visualmente
     const wrapper = el.closest(".col-md-3, .col-md-4, .col-md-6, .col-12");
     if (wrapper) wrapper.style.opacity = enabled ? "1" : "0.6";
   }
-
   function valueOk(id) {
     const el = $(id); if (!el) return false;
     const tag = el.tagName.toLowerCase();
     const v = tag === "select" ? el.value : (el.value || "").trim();
     return Boolean(v);
   }
-
-  // Deshabilitar todo excepto el primer campo
   function resetFlow(fromIndex = 0) {
     flow.forEach((id, i) => {
       if (i <= fromIndex) setEnabled(id, true);
       else {
         const el = $(id);
         setEnabled(id, false);
-        if (el) el.value = ""; // limpia
+        if (el) el.value = "";
       }
     });
     if (submitBtn) submitBtn.disabled = true;
   }
-
-  // Inicial: solo 'tipo_atencion' activo
   resetFlow(0);
 
-  // Al cambiar cada campo, habilita el siguiente si tiene valor;
-  // si queda vacío, deshabilita los siguientes.
   flow.forEach((id, idx) => {
     const el = $(id); if (!el) return;
     const ev = el.tagName.toLowerCase() === "select" ? "change" : "input";
     el.addEventListener(ev, () => {
       clearMsg();
-      // Si el actual se vacía, cortar flujo desde aquí
-      if (!valueOk(id)) {
-        resetFlow(idx);
-        return;
-      }
-      // Habilitar siguiente
+      if (!valueOk(id)) { resetFlow(idx); return; }
       const nextId = flow[idx + 1];
       if (nextId) setEnabled(nextId, true);
 
-      // Si ya completó todos, habilitar submit cuando validaciones pasen
       const allFilled = flow.every(valueOk);
       if (submitBtn) {
-        if (allFilled && validateRequired() && validateDateTimeLogic()) {
-          submitBtn.disabled = false;
-        } else {
-          submitBtn.disabled = true;
-        }
+        submitBtn.disabled = !(allFilled && validateRequired() && validateDateTimeLogic());
       }
     });
   });
 
-  // También volver a evaluar al cambiar cualquier cosa (por si llegan combos async)
   setTimeout(() => {
-    // si ya hay valores precargados, avanza el flujo automáticamente
     let lastIndexWithValue = 0;
     flow.forEach((id, i) => { if (valueOk(id)) lastIndexWithValue = i; });
     resetFlow(lastIndexWithValue);
@@ -232,35 +201,45 @@ export function registrarAtencion() {
     if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Enviando...'; }
 
     try {
-      const costoEstimado = await predecirCosto({ seccion, sub_categoria, tipo_solicitud, proceso, tiempo_promedio });
-      
-      showInfo(`Costo estimado: <strong>S/ ${costoEstimado.toFixed(2)}</strong>`);
+      // 1) Predicción (si falla, continuamos con null)
+      let costoEstimado = null;
+      try {
+        costoEstimado = await predecirCosto({ seccion, sub_categoria, tipo_solicitud, proceso, tiempo_promedio });
+        // Pinta en el input de costo
+        const ce = $("costo_estimado");
+        if (ce && costoEstimado != null) ce.value = Number(costoEstimado).toFixed(2);
+        showInfo(`Costo estimado: <strong>S/ ${Number(costoEstimado).toFixed(2)}</strong>`);
+      } catch (predErr) {
+        console.warn("No se pudo predecir el costo:", predErr);
+        showInfo("No se pudo estimar el costo ahora. Se registrará sin costo estimado.");
+      }
 
+      // 2) Envío al backend
       const res = await fetch(`${API_BASE_URL}/atenciones`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          tipo_atencion_id: tipoAtencion,
-          centro_costos_id: centroCostos,
+          tipo_atencion_id: Number(tipoAtencion),
+          centro_costos_id: Number(centroCostos),
           motivo,
           observacion: descripcion,
           fecha_atencion: fechaInicio,
           fecha_atencion_fin: fechaFin,
           hora_inicio: horaInicio,
           hora_fin: horaFin,
-          costo_estimado: costoEstimado,
-          
+          costo_estimado: (costoEstimado != null ? Number(costoEstimado) : null),
         }),
       });
 
       const result = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(result?.message || "Error al registrar atención.");
 
+      // 3) Mostrar OK y pintar Código Único
       showSuccess("✅ Solicitud registrada con éxito.");
       if (result?.id && $("id_atencion")) $("id_atencion").value = result.id;
 
-      // Reiniciar flujo (si quieres limpiar, descomenta)
+      // (opcional) reset:
       // form.reset();
       // resetFlow(0);
 

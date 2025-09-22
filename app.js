@@ -24,6 +24,7 @@ app.use("/", panelRoutes);
 
 
 
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Frontend corriendo en http://localhost:${PORT}`);

@@ -1,218 +1,219 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Panel</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <script
-      src="https://kit.fontawesome.com/bc8f0d305f.js"
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <style>
-      .prioridad-alta {
-        background-color: #f8d7da;
-        color: #721c24;
-      }
-      .prioridad-media {
-        background-color: #fff3cd;
-        color: #856404;
-      }
-      .prioridad-baja {
-        background-color: #d4edda;
-        color: #155724;
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://kit.fontawesome.com/bc8f0d305f.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    .prioridad-alta {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    .prioridad-media {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .prioridad-baja {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .estado-flechas {
+      display: flex;
+      align-items: stretch;
+      height: 40px;
+      gap: px;
+    }
+
+    .estado-flujo {
+      display: flex;
+      align-items: center;
+      margin-top: 1rem;
+      overflow-x: auto;
+    }
+
+    .step-flecha {
+      position: relative;
+      padding: 0.5rem 1.5rem;
+      background-color: #ccc;
+      color: #fff;
+      font-weight: bold;
+      margin-left: -20px;
+      clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);
+      z-index: 1;
+      min-width: 100px;
+      text-align: center;
+      font-size: .85rem;
+    }
+
+    .step-flecha:first-child {
+      margin-left: 0;
+    }
+
+    .step-flecha.active {
+      background-color: #28a745;
+      z-index: 2;
+    }
+
+    .step-flecha.completed {
+      background-color: #28a745;
+      z-index: 1;
+    }
+
+    .step-flecha:last-child {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .step-flecha:not(:last-child) {
+      margin-right: 5px;
+      background-clip: padding-box;
+    }
+
+    body {
+      margin: 0;
+      background-color: #f8f9fa;
+    }
+
+    .layout {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      background-color: #005826;
+      color: #fff;
+      width: 250px;
+      transition: width .3s ease;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+    }
+
+    .sidebar .logo {
+      font-size: 1.4rem;
+      font-weight: bold;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .sidebar .section-title {
+      font-size: .8rem;
+      text-transform: uppercase;
+      padding-left: 1.5rem;
+      margin-top: 1.5rem;
+      font-weight: bold;
+    }
+
+    .sidebar .nav-link {
+      color: #fff;
+      padding-left: 1.5rem;
+    }
+
+    .sidebar .nav-link:hover {
+      background-color: #014d20;
+    }
+
+    .main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .topbar {
+      background-color: #005826;
+      color: #fff;
+      height: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.5rem;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.5rem;
+      cursor: pointer;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 1100;
+    }
+
+    .dropdown-toggle::after {
+      display: none;
+    }
+
+    .dropdown-menu {
+      min-width: 150px;
+      right: 0;
+      left: auto;
+    }
+
+    .dropdown-item i {
+      margin-right: 8px;
+    }
+
+    .content {
+      width: 100%;
+      padding: 2rem;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .dropdown-menu {
+      animation: fadeInDropdown .2s ease-in-out;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fadeInDropdown {
+      from {
+        opacity: 0
       }
 
-      .estado-flechas {
-        display: flex;
-        align-items: stretch; /* importante para que las flechas tengan misma altura */
-        height: 40px; /* puedes ajustar la altura */ /* Espacio entre flechas */
-        gap: px;
+      to {
+        opacity: 1
       }
-      .estado-flujo {
-        display: flex;
-        align-items: center;
-        margin-top: 1rem;
-        overflow-x: auto;
-      }
+    }
+  </style>
+</head>
 
-      .step-flecha {
-        position: relative;
-        padding: 0.5rem 1.5rem;
-        background-color: #ccc;
-        color: white;
-        font-weight: bold;
-        margin-left: -20px; /* superposición para "encajar" las flechas */
-        clip-path: polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%);
-        z-index: 1;
-        min-width: 100px;
-        text-align: center;
-        font-size: 0.85rem;
-      }
+<body>
+  <div class="layout">
+    <button id="toggleBtn" class="toggle-btn" onclick="toggleSidebar()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
 
-      .step-flecha:first-child {
-        margin-left: 0; /* el primero no se superpone */
-      }
+    <!-- Sidebar dinámico -->
+    <nav id="sidebar" class="sidebar">
+      <div class="logo">Esmeralda</div>
 
-      .step-flecha.active {
-        background-color: #28a745; /* Azul para actual */
-        z-index: 2;
-      }
-      .step-flecha.completed {
-        background-color: #28a745; /* Verde para completados */
-        z-index: 1;
-      }
-
-      .step-flecha:last-child {
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
-      }
-
-      .step-flecha:not(:last-child) {
-        margin-right: 5px; /* Puedes ajustar el valor */
-        background-clip: padding-box; /* Evita que el fondo sobrescriba el margen */
-      }
-
-      body {
-        margin: 0;
-        background-color: #f8f9fa;
-      }
-
-      .layout {
-        display: flex;
-        height: 100vh;
-        overflow: hidden;
-      }
-
-      .sidebar {
-        background-color: #005826;
-        color: white;
-        width: 250px;
-        transition: width 0.3s ease;
-        overflow: hidden;
-      }
-
-      .sidebar.collapsed {
-        width: 0;
-      }
-
-      .sidebar .logo {
-        font-size: 1.4rem;
-        font-weight: bold;
-        padding: 1rem;
-        text-align: center;
-      }
-
-      .sidebar .section-title {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        padding-left: 1.5rem;
-        margin-top: 1.5rem;
-        font-weight: bold;
-      }
-
-      .sidebar .nav-link {
-        color: white;
-        padding-left: 1.5rem;
-      }
-
-      .sidebar .nav-link:hover {
-        background-color: #014d20;
-      }
-
-      .main {
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .topbar {
-        background-color: #005826;
-        color: white;
-        height: 60px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 1.5rem;
-      }
-
-      .toggle-btn {
-        background: none;
-        border: none;
-        color: white;
-        font-size: 1.5rem;
-        cursor: pointer;
-        position: fixed;
-        top: 15px;
-        left: 15px;
-        z-index: 1100;
-      }
-
-      .dropdown-toggle::after {
-        display: none;
-      }
-
-      .dropdown-menu {
-        min-width: 150px;
-        right: 0;
-        left: auto;
-      }
-
-      .dropdown-item i {
-        margin-right: 8px;
-      }
-
-      .content {
-        padding: 2rem;
-        flex-grow: 1;
-        overflow-y: auto;
-      }
-
-      .dropdown-menu {
-        animation: fadeInDropdown 0.2s ease-in-out;
-        opacity: 0;
-        animation-fill-mode: forwards;
-      }
-
-      @keyframes fadeInDropdown {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="layout">
-      <button id="toggleBtn" class="toggle-btn" onclick="toggleSidebar()">
-        <i class="fa-solid fa-bars"></i>
-      </button>
-
-      <!-- Sidebar dinámico -->
-      <nav id="sidebar" class="sidebar">
-        <div class="logo">Esmeralda</div>
-
-        <div class="section-title">Atenciones</div>
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a class="nav-link" href="#" data-page="/listado">Listado</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" data-page="/solicitud">Solicitud</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" data-page="/consulta">Consulta</a>
-          </li>
-        </ul>
-        <span id="usuarioTopbar"></span>
-        <% if (rol === "Administrador") { %>
+      <div class="section-title">Atenciones</div>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-page="/listado">Listado</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-page="/solicitud">Solicitud</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#" data-page="/consulta">Consulta</a>
+        </li>
+      </ul>
+      <span id="usuarioTopbar"></span>
+      <% if (rol==="Administrador" ) { %>
         <!-- Opciones visibles solo para administrador -->
         <div class="section-title">Cotización</div>
         <ul class="nav flex-column">
@@ -220,221 +221,240 @@
             <a class="nav-link" href="#" data-page="/cotizacion">Cotización</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#" data-page="/atenciones_cotizadas"
-              >Atenciones Cotizadas</a
-            >        
+            <a class="nav-link" href="#" data-page="/atenciones_cotizadas">Atenciones Cotizadas</a>
           </li>
-             <li class="nav-item">
-            <a class="nav-link" href="#" data-page="/estado_atenciones"
-              >Reporte de Atenciones</a
-            >
-            
+          <li class="nav-item">
+            <a class="nav-link" href="#" data-page="/estado_atenciones">Reporte de Atenciones</a>
           </li>
         </ul>
         <% } %>
-      </nav>
+    </nav>
 
-      <!-- Main -->
-      <div class="main">
-        <div
-          class="topbar d-flex justify-content-end align-items-center gap-3 px-3"
-        >
-          <!-- Campana de notificaciones - Dropdown independiente -->
-          <div class="dropdown" id="notificacionDropdown">
-            <button
-              class="btn btn-link text-white position-relative"
-              id="iconoNotificaciones"
-              data-bs-toggle="dropdown"
-            >
-              <i class="fas fa-bell fa-lg"></i>
-              <span
-                id="notiBadge"
-                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                style="display: none; font-size: 0.6rem"
-              >
-                0
-              </span>
-            </button>
-            <ul
-              id="notiLista"
-              class="dropdown-menu dropdown-menu-end text-dark shadow"
-              style="width: 300px; max-height: 300px; overflow-y: auto"
-            >
-              <li class="dropdown-header">Notificaciones</li>
-              <li><hr class="dropdown-divider" /></li>
-              <!-- Las notificaciones se insertan aquí -->
-            </ul>
-          </div>
-
-          <!-- Menú de usuario -->
-          <div class="dropdown">
-            <div
-              class="d-flex align-items-center dropdown-toggle"
-              data-bs-toggle="dropdown"
-              style="cursor: pointer"
-            >
-              <span id="usuarioTopbar"><%= rol %> - <%= username %></span>
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
-                alt="Usuario"
-                style="width: 35px; height: 35px; border-radius: 50%"
-              />
-            </div>
-            <ul class="dropdown-menu dropdown-menu-end text-dark shadow">
-              <li>
-                <a class="dropdown-item" href="#"
-                  ><i class="fa-solid fa-user"></i> Mi perfil</a
-                >
-              </li>
-              <li><hr class="dropdown-divider" /></li>
-              <li>
-                <a
-                  class="dropdown-item text-danger"
-                  href="#"
-                  onclick="cerrarSesion()"
-                >
-                  <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
-                </a>
-              </li>
-            </ul>
-          </div>
+    <!-- Main -->
+    <div class="main">
+      <div class="topbar d-flex justify-content-end align-items-center gap-3 px-3">
+        <!-- Campana de notificaciones -->
+        <div class="dropdown" id="notificacionDropdown">
+          <button class="btn btn-link text-white position-relative" id="iconoNotificaciones" data-bs-toggle="dropdown">
+            <i class="fas fa-bell fa-lg"></i>
+            <span id="notiBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+              style="display:none;font-size:.6rem">0</span>
+          </button>
+          <ul id="notiLista" class="dropdown-menu dropdown-menu-end text-dark shadow"
+            style="width:300px;max-height:300px;overflow-y:auto">
+            <li class="dropdown-header">Notificaciones</li>
+            <li>
+              <hr class="dropdown-divider" />
+            </li>
+          </ul>
         </div>
 
-        <div class="content">
-          <div
-            id="container"
-            style="width: 100%; height: 400px; margin: auto"
-          ></div>
-
-          <!-- Contenido dinámico se carga aquí -->
+        <!-- Menú de usuario -->
+        <div class="dropdown">
+          <div class="d-flex align-items-center dropdown-toggle" data-bs-toggle="dropdown" style="cursor:pointer">
+            <span id="usuarioTopbar">
+              <%= rol %> - <%= username %>
+            </span>
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Usuario"
+              style="width:35px;height:35px;border-radius:50%" />
+          </div>
+          <ul class="dropdown-menu dropdown-menu-end text-dark shadow">
+            <li><a class="dropdown-item" href="#"><i class="fa-solid fa-user"></i> Mi perfil</a></li>
+            <li>
+              <hr class="dropdown-divider" />
+            </li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="cerrarSesion()"><i
+                  class="fa-solid fa-right-from-bracket"></i> Cerrar sesión</a></li>
+          </ul>
         </div>
       </div>
+
+      <div class="content">
+  <div style="width: 70%;">
+        <div class="card p-3 mb-3">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Área</label>
+              <select id="fArea" class="form-select">
+                <option value="">Todas</option>
+                <!-- si quieres, luego puedes poblar áreas reales -->
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Rango</label>
+              <select id="fRange" class="form-select">
+                <option value="n" selected>Últimos N días</option>
+                <option value="m">Mes</option>
+              </select>
+            </div>
+
+            <div id="wrapDays" class="col-md-2">
+              <label class="form-label">Días</label>
+              <input id="fDays" type="number" class="form-control" value="30" min="1" />
+            </div>
+
+            <div id="wrapMonth" class="col-md-3 d-none">
+              <label class="form-label">Mes</label>
+              <input id="fMonth" type="month" class="form-control" />
+            </div>
+
+            <div class="col-md-2 form-check mt-4">
+              <input id="fClosed" class="form-check-input" type="checkbox" />
+              <label class="form-check-label">Solo finalizadas</label>
+            </div>
+
+            <div class="col-md-2 form-check mt-4">
+              <input id="fUseClose" class="form-check-input" type="checkbox" />
+              <label class="form-check-label">Usar fecha de cierre</label>
+            </div>
+
+            <div class="col-md-2">
+              <button id="btnApply" class="btn btn-primary w-100">Aplicar</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="container" style="width: 100%; height: 420px"></div>
+          </div>
+      </div>
+
     </div>
+  </div>
 
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="/js/load-content.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="/js/load-content.js"></script>
 
-    <div
-      id="toast-container"
-      class="toast-container position-fixed bottom-0 end-0 p-3"
-    ></div>
+  <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
-    <script>
-      function cerrarSesion() {
-        // Elimina la cookie en el backend (puede hacerse con una ruta /logout)
-        fetch("/logout", {
-          method: "POST",
-        }).then(() => {
-          window.location.href = "/login";
-        });
-      }
+  <script>
+    function cerrarSesion() {
+      fetch("/logout", { method: "POST" }).then(() => { window.location.href = "/login"; });
+    }
+    function toggleSidebar() { document.getElementById("sidebar").classList.toggle("collapsed"); }
 
-      function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("collapsed");
-      }
-      const duraciones = [28, 33, 29, 40, 26, 32, 31, 30]; // datos simulados
-      const tiempoEstimado = 50;
+   // ================== MÉTRICA: Atenciones por Área ==================
+  const API_BASE_URL_PROD = "http://localhost:3001/api";
 
-      Highcharts.chart("container", {
-        chart: {
-          type: "column",
-        },
-        title: {
-          text: "World's largest cities per 2021",
-        },
-        subtitle: {
-          text: 'Source: <a href="https://worldpopulationreview.com/world-cities" target="_blank">World Population Review</a>',
-        },
-        xAxis: {
-          type: "category",
-          labels: {
-            autoRotation: [-45, -90],
-            style: {
-              fontSize: "13px",
-              fontFamily: "Verdana, sans-serif",
-            },
-          },
-        },
-        yAxis: {
-          min: 0,
-          title: {
-            text: "Population (millions)",
-          },
-        },
-        legend: {
-          enabled: false,
-        },
-        tooltip: {
-          pointFormat: "Population in 2021: <b>{point.y:.1f} millions</b>",
-        },
-        series: [
-          {
-            name: "Population",
-            colors: [
-              "#9b20d9",
-              "#9215ac",
-              "#861ec9",
-              "#7a17e6",
-              "#7010f9",
-              "#691af3",
-              "#6225ed",
-              "#5b30e7",
-              "#533be1",
-              "#4c46db",
-              "#4551d5",
-              "#3e5ccf",
-              "#3667c9",
-              "#2f72c3",
-              "#277dbd",
-              "#1f88b7",
-              "#1693b1",
-              "#0a9eaa",
-              "#03c69b",
-              "#00f194",
-            ],
-            colorByPoint: true,
-            groupPadding: 0,
-            data: [
-              ["Tokyo", 37.33],
-              ["Delhi", 31.18],
-              ["Shanghai", 27.79],
-              ["Sao Paulo", 22.23],
-              ["Mexico City", 21.91],
-              ["Dhaka", 21.74],
-              ["Cairo", 21.32],
-              ["Beijing", 20.89],
-              ["Mumbai", 20.67],
-              ["Osaka", 19.11],
-              ["Karachi", 16.45],
-              ["Chongqing", 16.38],
-              ["Istanbul", 15.41],
-              ["Buenos Aires", 15.25],
-              ["Kolkata", 14.974],
-              ["Kinshasa", 14.97],
-              ["Lagos", 14.86],
-              ["Manila", 14.16],
-              ["Tianjin", 13.79],
-              ["Guangzhou", 13.64],
-            ],
-            dataLabels: {
-              enabled: true,
-              rotation: -90,
-              color: "#FFFFFF",
-              inside: true,
-              verticalAlign: "top",
-              format: "{point.y:.1f}", // one decimal
-              y: 10, // 10 pixels down from the top
-              style: {
-                fontSize: "13px",
-                fontFamily: "Verdana, sans-serif",
-              },
-            },
-          },
-        ],
+  async function cargarAreas() {
+    const sel = document.getElementById('fArea');
+    try {
+      const r = await fetch(`${API_BASE_URL_PROD}/areas`, { credentials: 'include' });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const areas = await r.json();
+      areas.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.id;
+        opt.textContent = a.descripcion;
+        sel.appendChild(opt);
       });
-    </script>
-  </body>
+    } catch (e) {
+      console.error('Áreas:', e);
+    }
+  }
+
+  function setMonthDefault() {
+    const m = new Date().toISOString().slice(0, 7); // YYYY-MM
+    const el = document.getElementById('fMonth');
+    if (el && !el.value) el.value = m;
+  }
+
+  async function graficar(opts = {}) {
+    const {
+      range = 'm',         // 'm' (mes) | 'n' (últimos N días)
+      month,               // YYYY-MM (si range='m')
+      days,                // número (si range='n')
+      areaId,              // id de área (opcional)
+      onlyClosed = false,  // solo finalizadas
+      useClose = false     // usar fecha de cierre
+    } = opts;
+
+    const url = new URL(`${API_BASE_URL_PROD}/atenciones-por-area`);
+    url.searchParams.set('range', range);
+    if (range === 'm' && month) url.searchParams.set('month', month);
+    if (range === 'n') url.searchParams.set('days', days || 30);
+    if (areaId) url.searchParams.set('area_id', areaId);
+    if (onlyClosed) url.searchParams.set('onlyClosed', '1');
+    if (useClose) url.searchParams.set('useClose', '1');
+
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { rows = [], start, end, range: rUsed, dias: dUsed } = await res.json();
+
+    const data = rows.map(r => [r.area || 'Sin área', Number(r.total || 0)]);
+    let subt = `Periodo: ${start} a ${end}`;
+    if (rUsed === 'ultimos' || range === 'n') subt = `Últimos ${dUsed || days || 30} días (hasta hoy)`;
+
+    Highcharts.chart("container", {
+      chart: { type: "column" },
+      title: { text: "Atenciones por Área" },
+      subtitle: { text: subt },
+      xAxis: { type: "category", labels: { autoRotation: [-45, -90] } },
+      yAxis: { min: 0, title: { text: "N° de atenciones" } },
+      legend: { enabled: false },
+      tooltip: { pointFormat: "Atenciones: <b>{point.y}</b>" },
+      series: [{
+        name: "Atenciones",
+        colorByPoint: true,
+        data,
+        dataLabels: {
+          enabled: true, rotation: -90, inside: true,
+          verticalAlign: "top", format: "{point.y}", y: 10
+        }
+      }]
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await cargarAreas();
+    setMonthDefault();
+
+    const rangeSel  = document.getElementById('fRange');
+    const wrapDays  = document.getElementById('wrapDays');
+    const wrapMonth = document.getElementById('wrapMonth');
+
+    function toggleRange() {
+      if (rangeSel.value === 'm') {
+        wrapMonth.classList.remove('d-none');
+        wrapDays.classList.add('d-none');
+      } else {
+        wrapDays.classList.remove('d-none');
+        wrapMonth.classList.add('d-none');
+      }
+    }
+    rangeSel.addEventListener('change', toggleRange);
+    toggleRange();
+
+    // Carga inicial: mes actual, todas las áreas
+    await graficar({
+      range: 'm',
+      month: document.getElementById('fMonth').value,
+      onlyClosed: document.getElementById('fClosed').checked,
+      useClose: document.getElementById('fUseClose').checked,
+      areaId: document.getElementById('fArea').value || undefined
+    });
+
+    document.getElementById('btnApply').addEventListener('click', async () => {
+      const range = document.getElementById('fRange').value;       // 'm' | 'n'
+      const month = document.getElementById('fMonth').value;       // YYYY-MM
+      const days  = Number(document.getElementById('fDays').value || 30);
+      const areaId = document.getElementById('fArea').value || '';
+      const onlyClosed = document.getElementById('fClosed').checked;
+      const useClose   = document.getElementById('fUseClose').checked;
+
+      await graficar({
+        range,
+        month,
+        days,
+        areaId: areaId || undefined,
+        onlyClosed,
+        useClose
+      });
+    });
+  });
+  </script>
+</body>
+
 </html>

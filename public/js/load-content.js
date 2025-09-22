@@ -1,5 +1,5 @@
 const socket = io("http://localhost:3001", { withCredentials: true });
-const API_BASE_URL = "http://localhost:3001/api"; 
+const API_BASE_URL = "http://localhost:3001/api";
 
 let usuarioAutenticado = null;
 
@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   await obtenerUsuario();
   if (!usuarioAutenticado) return;
 
-await cargarNotificacionesGuardadas();
+  await cargarNotificacionesGuardadas();
   // ✅ Conexión al WebSocket
   const socket = io("http://localhost:3001", { withCredentials: true });
 
@@ -33,59 +33,59 @@ await cargarNotificacionesGuardadas();
     console.log("✅ Conectado al WebSocket:", socket.id);
   });
 
-socket.on("estadoActualizado", async ({ id_empleado, id_estado, id_atencion, estado }) => {
-  console.log("🔁 Socket recibido", { id_empleado, id_estado, id_atencion, estado });
+  socket.on("estadoActualizado", async ({ id_empleado, id_estado, id_atencion, estado }) => {
+    console.log("🔁 Socket recibido", { id_empleado, id_estado, id_atencion, estado });
 
-  if (usuarioAutenticado?.empleado_id !== id_empleado) {
-    console.log("❌ No soy el dueño, no mostraré notificación.");
-    return;
-  }
+    if (usuarioAutenticado?.empleado_id !== id_empleado) {
+      console.log("❌ No soy el dueño, no mostraré notificación.");
+      return;
+    }
 
-  console.log("✅ Soy el dueño, mostrando notificación");
+    console.log("✅ Soy el dueño, mostrando notificación");
 
-  // 🔔 Mostrar toast
-  mostrarToast(`Tu atención #${id_atencion} ha sido actualizada a "${estado}"`);
+    // 🔔 Mostrar toast
+    mostrarToast(`Tu atención #${id_atencion} ha sido actualizada a "${estado}"`);
 
-  // 📦 Insertar notificación en el DOM
-  const notiLista = document.getElementById("notiLista");
-  if (notiLista) {
-    const notificationItem = document.createElement("li");
-    notificationItem.classList.add("dropdown-item");
-    notificationItem.innerHTML = `
+    // 📦 Insertar notificación en el DOM
+    const notiLista = document.getElementById("notiLista");
+    if (notiLista) {
+      const notificationItem = document.createElement("li");
+      notificationItem.classList.add("dropdown-item");
+      notificationItem.innerHTML = `
       <i class="fas fa-info-circle"></i> Tu atención #${id_atencion} ha sido actualizada a "${estado}"
     `;
-    notiLista.prepend(notificationItem); // prepend para ponerla arriba
-  }
-
-  // 📬 Actualizar contador desde el backend
-  try {
-    const res = await fetch(`${API_BASE_URL}/notificaciones`, {
-      credentials: "include"
-    });
-
-    if (res.ok) {
-      const notificaciones = await res.json();
-      const badge = document.getElementById("notiBadge");
-      const notiIcon = document.getElementById("iconoNotificaciones");
-
-      if (badge && notiIcon) {
-        const cantidad = notificaciones.length;
-        badge.textContent = cantidad;
-        badge.style.display = cantidad > 0 ? "inline" : "none";
-        notiIcon.dataset.count = cantidad;
-        notiIcon.classList.add("notify");
-      }
+      notiLista.prepend(notificationItem); // prepend para ponerla arriba
     }
-  } catch (err) {
-    console.error("❌ Error al actualizar contador de notificaciones:", err);
-  }
 
-  // 📤 Emitir evento interno para actualizar visualmente la atención
-  const evento = new CustomEvent("estado-atencion-actualizado", {
-    detail: { id: id_atencion, id_estado },
+    // 📬 Actualizar contador desde el backend
+    try {
+      const res = await fetch(`${API_BASE_URL}/notificaciones`, {
+        credentials: "include"
+      });
+
+      if (res.ok) {
+        const notificaciones = await res.json();
+        const badge = document.getElementById("notiBadge");
+        const notiIcon = document.getElementById("iconoNotificaciones");
+
+        if (badge && notiIcon) {
+          const cantidad = notificaciones.length;
+          badge.textContent = cantidad;
+          badge.style.display = cantidad > 0 ? "inline" : "none";
+          notiIcon.dataset.count = cantidad;
+          notiIcon.classList.add("notify");
+        }
+      }
+    } catch (err) {
+      console.error("❌ Error al actualizar contador de notificaciones:", err);
+    }
+
+    // 📤 Emitir evento interno para actualizar visualmente la atención
+    const evento = new CustomEvent("estado-atencion-actualizado", {
+      detail: { id: id_atencion, id_estado },
+    });
+    window.dispatchEvent(evento);
   });
-  window.dispatchEvent(evento);
-});
 
 
 
@@ -121,12 +121,20 @@ socket.on("estadoActualizado", async ({ id_empleado, id_estado, id_atencion, est
                 module.listarAtenciones();
               })
               .catch((err) => console.error("Error al cargar estado_atenciones.js:", err));
-          }    else if (url.includes("estado_atenciones")) {
+          /*} else if (url.includes("estado_atenciones")) {
             import("/js/estado_atenciones.js")
               .then((module) => {
                 module.loadRowsFromAPI();
               })
               .catch((err) => console.error("Error al cargar listado_atenciones.js:", err));
+
+          }*/ } else if (url.includes("estado_atenciones")) {
+            import("/js/estado_atenciones.js")
+              .then((module) => {
+                // 👇 Este sí registra los handlers y luego trae la data
+                module.initReporteTicketsCerrados();
+              })
+              .catch((err) => console.error("Error al cargar estado_atenciones.js:", err));
           } else if (url.includes("cotizacion")) {
             import("/js/cotizacion.js")
               .then((module) => {
