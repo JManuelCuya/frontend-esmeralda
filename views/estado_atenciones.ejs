@@ -1,0 +1,146 @@
+<head>
+  <meta charset="utf-8" />
+  <title>Informe de Tickets Cerrados</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+  <div class="container">
+    <header>
+      <h1>Informe de Tickets Cerrados</h1>
+      <div class="muted">Historial con filtros, exportación (PDF/Excel) y detalle por ticket.</div>
+    </header>
+
+    <!-- Filtros -->
+    <section class="card pad-lg" style="margin-top:14px">
+      <div class="grid grid-6">
+        <div class="col-2">
+          <label class="muted" for="q">Buscar (código/solicitante/resumen)</label>
+          <input id="q" class="input" placeholder="SRV-1001 / María / SAP..." />
+        </div>
+        <div>
+          <label class="muted" for="area">Área</label>
+          <select id="area">
+            <option value="">Todas</option>
+            <option>Soporte</option>
+            <option>Infraestructura</option>
+            <option>Desarrollo</option>
+          </select>
+        </div>
+        <div>
+          <label class="muted" for="tipo">Tipo</label>
+          <select id="tipo">
+            <option value="">Todos</option>
+            <option>Incidencia</option>
+            <option>Requerimiento</option>
+          </select>
+        </div>
+        <div>
+          <label class="muted" for="prioridad">Prioridad</label>
+          <select id="prioridad">
+            <option value="">Todas</option>
+            <option>Alta</option>
+            <option>Media</option>
+            <option>Baja</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1">
+            <label class="muted" for="desde">Desde</label>
+            <input id="desde" type="date" class="input" />
+          </div>
+          <div style="flex:1">
+            <label class="muted" for="hasta">Hasta</label>
+            <input id="hasta" type="date" class="input" />
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button id="btnPdf" class="btn btn-dark">Exportar PDF</button>
+          <button id="btnCsv" class="btn btn-ghost">Exportar Excel</button>
+        </div>
+        <div class="muted" id="statsLine">Total filtrados: 0 • Tiempo prom.: 0 min</div>
+      </div>
+    </section>
+
+    <!-- KPIs -->
+    <section class="kpis" style="margin:14px 0">
+      <div class="kpi"><div class="label">Tickets cerrados</div><div class="value" id="kpiTotal">0</div></div>
+      <div class="kpi"><div class="label">Promedio de atención</div><div class="value" id="kpiProm">0 min</div></div>
+      <div class="kpi"><div class="label">% prioridad alta</div><div class="value" id="kpiHigh">0%</div></div>
+    </section>
+
+    <!-- Tabla -->
+    <section class="card">
+      <div class="table-wrap">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Fecha cierre</th>
+              <th>Solicitante</th>
+              <th>Área</th>
+              <th>Tipo</th>
+              <th>Prioridad</th>
+              <th>Responsable</th>
+              <th class="num">Tiempo (min)</th>
+              <th class="center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="9" class="empty">Cargando…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="muted">Filas por página</span>
+          <select id="perPage">
+            <option>5</option>
+            <option selected>10</option>
+            <option>20</option>
+          </select>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button id="first" class="btn btn-ghost">«</button>
+          <button id="prev" class="btn btn-ghost">‹</button>
+          <span id="pageInfo" class="muted">Página 1 de 1</span>
+          <button id="next" class="btn btn-ghost">›</button>
+          <button id="last" class="btn btn-ghost">»</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Slide-over Detalle -->
+  <div id="overlay" class="overlay"></div>
+  <aside id="panel" class="panel" aria-hidden="true">
+    <div class="panel-header">
+      <div>
+        <div style="font-weight:700" id="pTitle">Ticket</div>
+        <div class="muted" id="pSub">Estado: Cerrado • Cierre: —</div>
+      </div>
+      <button id="closePanel" class="btn btn-ghost">Cerrar</button>
+    </div>
+    <div class="panel-body">
+      <div class="info-grid" id="infoGrid"></div>
+
+      <div style="margin-top:12px">
+        <div class="muted" style="font-size:13px">Resumen</div>
+        <div id="pResumen" style="font-size:14px">—</div>
+      </div>
+
+      <div style="margin-top:16px">
+        <div style="font-weight:600">Historial de la atención</div>
+        <ul class="timeline" id="pTimeline"></ul>
+      </div>
+
+      <div class="actions">
+        <button id="pPdf" class="btn btn-dark">Descargar PDF</button>
+        <button id="pCsv" class="btn btn-ghost">Descargar Excel</button>
+      </div>
+    </div>
+  </aside>
+

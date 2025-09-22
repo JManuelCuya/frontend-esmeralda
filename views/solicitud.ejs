@@ -1,0 +1,90 @@
+<div class="container">
+  <h4 class="mb-4">Registrar Solicitud de Atención</h4>
+
+  <!-- ...arriba va lo que ya tienes... -->
+<div class="row g-3">
+<div class="col-md-6">
+  <label for="costo_estimado" class="form-label">Precio / Costo Estimado (S/)</label>
+  <input type="text" class="form-control" id="costo_estimado" readonly />
+  <div class="invalid-feedback">—</div>
+</div>
+
+<div class="col-md-6">
+  <label for="id_atencion" class="form-label">Código Único</label>
+  <input type="text" class="form-control" id="id_atencion" name="id_atencion" readonly />
+  <div class="invalid-feedback">—</div>
+</div>
+</div>
+
+<hr>
+<!-- ...abajo sigue lo demás (Motivo, Descripción, botón, #mensaje)... -->
+
+  <!-- Aquí aparecerán los mensajes (errores/avisos/éxito) -->
+  <div id="mensaje" class="mt-3" aria-live="polite"></div>
+
+  <form id="formSolicitud" class="row g-3" novalidate>
+    <div class="col-md-3">
+      <label for="tipo_atencion" class="form-label">Tipo de Atención</label>
+      <select id="tipo_atencion" class="form-select" required>
+        <option value="">--- Seleccione ---</option>
+        <!-- Opciones reales se cargan por JS -->
+      </select>
+      <div class="invalid-feedback">Selecciona el tipo de atención.</div>
+    </div>
+
+    <div class="col-md-3">
+      <label for="centro_costos" class="form-label">Centro de Costos</label>
+      <select id="centro_costos" class="form-select" required>
+        <option value="">--- Seleccione ---</option>
+      </select>
+      <div class="invalid-feedback">Selecciona el centro de costos.</div>
+    </div>
+
+    <div class="col-md-3">
+      <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+      <input type="date" class="form-control" id="fecha_inicio" required />
+      <div class="invalid-feedback">La fecha de inicio es obligatoria.</div>
+    </div>
+
+    <div class="col-md-3">
+      <label for="fecha_fin" class="form-label">Fecha Fin</label>
+      <input type="date" class="form-control" id="fecha_fin" required />
+      <div class="invalid-feedback">La fecha de fin es obligatoria.</div>
+    </div>
+
+    <div class="col-md-3">
+      <label for="hora_inicio" class="form-label">Hora de Inicio</label>
+      <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required />
+      <div class="invalid-feedback">La hora de inicio es obligatoria.</div>
+    </div>
+
+    <div class="col-md-3">
+      <label for="hora_fin" class="form-label">Hora de Fin</label>
+      <input type="time" class="form-control" id="hora_fin" name="hora_fin" required />
+      <div class="invalid-feedback">La hora de fin es obligatoria (y debe cumplir las reglas).</div>
+    </div>
+
+    <!-- Código Único: visible en DOM pero oculto (lo rellena backend) -->
+    <div class="col-md-4" id="wrap_id_atencion" style="display:none;">
+      <label for="id_atencion" class="form-label">Código Único</label>
+      <input type="text" class="form-control" id="id_atencion" name="id_atencion" readonly />
+      <div class="invalid-feedback">No se generó el código único.</div>
+    </div>
+
+    <div class="col-md-6">
+      <label for="motivo" class="form-label">Motivo</label>
+      <input type="text" class="form-control" id="motivo" name="motivo" required />
+      <div class="invalid-feedback">El motivo es obligatorio.</div>
+    </div>
+
+    <div class="col-12">
+      <label for="descripcion" class="form-label">Descripción</label>
+      <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+      <div class="invalid-feedback">La descripción es obligatoria.</div>
+    </div>
+
+    <div class="col-12 text-end">
+      <button type="submit" class="btn btn-success" disabled>Enviar Solicitud</button>
+    </div>
+  </form>
+</div>
